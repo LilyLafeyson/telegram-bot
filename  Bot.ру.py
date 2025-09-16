@@ -2,8 +2,7 @@
 import os
 import logging
 from telegram import Update
-from telegram.ext import Updater, MessageHandler, Filters, 
-CallbackContext, CommandHandler
+from telegram.ext import Updater, MessageHandler, Filters, CallbackContext, CommandHandler
 from telegram.error import BadRequest
 
 # Включаем логирование
@@ -28,20 +27,17 @@ def handle_tagged_message(update: Update, context: CallbackContext):
     if '#помощь' in message.text.lower():
         user = message.from_user
         user_id = user.id
-        username = f"@{user.username}" if user.username else 
-user.first_name
+        username = f"@{user.username}" if user.username else user.first_name
 
         try:
             sent = context.bot.send_message(
                 chat_id=MODERATOR_GROUP_ID,
-                text=f"Сообщение от {username} (ID: 
-{user_id}):\n{message.text}"
+                text=f"Сообщение от {username} (ID: {user_id}):\n{message.text}"
             )
             forwarded_messages[sent.message_id] = user_id
 
             # Удаление оригинального сообщения в группе
-            context.bot.delete_message(chat_id=message.chat_id, 
-message_id=message.message_id)
+            context.bot.delete_message(chat_id=message.chat_id, message_id=message.message_id)
 
         except BadRequest as e:
             logger.warning(f"Ошибка при пересылке или удалении: {e}")
@@ -59,8 +55,7 @@ def handle_reply(update: Update, context: CallbackContext):
         try:
             # Отправка ответа пользователю
             context.bot.send_message(chat_id=user_id, text=message.text)
-            context.bot.send_message(chat_id=MODERATOR_GROUP_ID, text="✅ 
-Ответ отправлен пользователю.")
+            context.bot.send_message(chat_id=MODERATOR_GROUP_ID, text="✅ Ответ отправлен пользователю.")
 
             # Обновляем текст исходного сообщения с отметкой
             old_text = message.reply_to_message.text
@@ -71,8 +66,7 @@ def handle_reply(update: Update, context: CallbackContext):
                     text=old_text + "\n\n✅ Ответ дан"
                 )
         except BadRequest:
-            context.bot.send_message(chat_id=MODERATOR_GROUP_ID, text="❌ 
-Не удалось отправить сообщение. Пользователь не написал боту первым.")
+            context.bot.send_message(chat_id=MODERATOR_GROUP_ID, text="❌ Не удалось отправить сообщение. Пользователь не написал боту первым.")
 
 def ping_command(update: Update, context: CallbackContext):
     user_id = update.effective_user.id
@@ -86,8 +80,7 @@ def main():
     # Берём токен из переменной окружения
     TOKEN = os.environ.get("BOT_TOKEN")
     if not TOKEN:
-        raise ValueError("❌ Ошибка: переменная окружения BOT_TOKEN не 
-найдена. Установи её в Render!")
+        raise ValueError("❌ Ошибка: переменная окружения BOT_TOKEN не найдена. Установи её в Render!")
 
     PORT = int(os.environ.get("PORT", 5000))
 
@@ -95,10 +88,8 @@ def main():
     dp = updater.dispatcher
 
     # Добавляем обработчики
-    dp.add_handler(MessageHandler(Filters.text & 
-Filters.chat(chat_id=SOURCE_GROUP_IDS), handle_tagged_message))
-    dp.add_handler(MessageHandler(Filters.reply & 
-Filters.chat(chat_id=MODERATOR_GROUP_ID), handle_reply))
+    dp.add_handler(MessageHandler(Filters.text & Filters.chat(chat_id=SOURCE_GROUP_IDS), handle_tagged_message))
+    dp.add_handler(MessageHandler(Filters.reply & Filters.chat(chat_id=MODERATOR_GROUP_ID), handle_reply))
     dp.add_handler(CommandHandler("ping", ping_command))
 
     # Настройка webhook для Render
@@ -107,14 +98,10 @@ Filters.chat(chat_id=MODERATOR_GROUP_ID), handle_reply))
         port=PORT,
         url_path=TOKEN
     )
-    
-updater.bot.set_webhook(f"https://telegram-bot-5fxs.onrender.com/{TOKEN}")
+    updater.bot.set_webhook(f"https://telegram-bot-5fxs.onrender.com/{TOKEN}")
 
     logger.info("Бот запущен на webhook")
     updater.idle()
 
 if __name__ == '__main__':
     main()
-
-
-
