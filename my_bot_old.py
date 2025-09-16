@@ -1,4 +1,5 @@
 import logging
+import os
 from telegram import Update
 from telegram.ext import Updater, MessageHandler, Filters, CallbackContext, CommandHandler
 from telegram.error import BadRequest
@@ -70,9 +71,14 @@ def ping_command(update: Update, context: CallbackContext):
         update.message.reply_text("Бот работает ✅")
     else:
         update.message.reply_text("Команда доступна только модераторам.")
-
+        
 def main():
-    TOKEN = "8236557309:AAEWhinAKHnDN2ABjyOdQjlmqiTcbzFQpas"  
+    # Берём токен из переменной окружения
+    TOKEN = os.environ.get("BOT_TOKEN")
+    if not TOKEN:
+        raise ValueError("❌ Ошибка: переменная окружения BOT_TOKEN не найдена. Установи её в Render!")
+
+
     updater = Updater(TOKEN, use_context=True)
     dp = updater.dispatcher
 
